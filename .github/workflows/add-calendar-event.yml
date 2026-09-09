@@ -1,34 +1,51 @@
-name: 自然言語からコピー用カレンダーへ予定を追加
+name: Add Calendar Events from a Web Page
 
 permissions:
   contents: write
 
 on:
   workflow_dispatch:
+    inputs:
+      source_url:
+        description: HTTPS URL of the event page
+        required: true
+        type: string
 
 jobs:
   add-event:
+    name: Add Calendar Events
     runs-on: ubuntu-latest
 
     steps:
-      - name: リポジトリを取得
+      - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: 予定 JSON を生成して ICS カレンダーを更新
+      - name: Fetch event page
+        shell: bash
+        env:
+          CALENDAR_SOURCE_URL: ${{ inputs.source_url }}
+        run: |
+          set -euo pipefail
+          test -n "$CALENDAR_SOURCE_URL"
+          curl --fail --location --proto '=https' --tlsv1.2 \
+            --output calendar/event-source.html \
+            "$CALENDAR_SOURCE_URL"
+
+      - name: Generate event JSON and update ICS calendar
         shell: bash
         env:
           GEMINI_APIKEY: ${{ secrets.GEMINI_APIKEY }}
         run: |
           set -euo pipefail
           python scripts/add_ics_event.py \
-            --source calendar/event-source.md \
+            --source calendar/event-source.html \
             --json-output calendar/event-sources/latest.json \
             --output calendar/calender.ics
 
-      - name: カレンダーをコミット
+      - name: Commit calendar changes
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add calendar/calender.ics calendar/event-sources/
+          git add calendar/calender.ics calendar/event-source.html calendar/event-sources/
           git diff --staged --quiet || git commit -m "Add calendar events"
           git push
