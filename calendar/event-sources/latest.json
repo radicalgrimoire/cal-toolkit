@@ -1,30 +1,22 @@
 {
   "schema_version": 1,
-  "title": "TOKYO AUTO SALON 2027",
+  "title": "[Alexandros] presents THIS FES ’26 in Sagamihara",
   "events": [
     {
-      "title": "TOKYO AUTO SALON 2027",
-      "date": "2027-01-15",
+      "title": "[Alexandros] presents THIS FES ’26 in Sagamihara",
+      "date": "2026-10-31",
       "open_at": "09:00",
-      "start_at": "09:00",
-      "end_at": "19:00",
-      "location": "幕張メッセ"
+      "start_at": "11:00",
+      "end_at": "19:30",
+      "location": "相模原ギオンフィールド、及びその周辺"
     },
     {
-      "title": "TOKYO AUTO SALON 2027",
-      "date": "2027-01-16",
+      "title": "[Alexandros] presents THIS FES ’26 in Sagamihara",
+      "date": "2026-11-01",
       "open_at": "09:00",
-      "start_at": "09:00",
-      "end_at": "19:00",
-      "location": "幕張メッセ"
-    },
-    {
-      "title": "TOKYO AUTO SALON 2027",
-      "date": "2027-01-17",
-      "open_at": "09:00",
-      "start_at": "09:00",
-      "end_at": "18:00",
-      "location": "幕張メッセ"
+      "start_at": "11:00",
+      "end_at": "19:30",
+      "location": "相模原ギオンフィールド、及びその周辺"
     }
   ]
 }
