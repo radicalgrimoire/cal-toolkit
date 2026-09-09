@@ -140,6 +140,15 @@ def remove_source_events(calendar: str) -> str:
     return pattern.sub(keep_other_events, calendar)
 
 
+def set_calendar_name(calendar: str, calendar_name: str) -> str:
+    return re.sub(
+        r"(?m)^X-WR-CALNAME:.*$",
+        f"X-WR-CALNAME:{escape_ics(calendar_name)}",
+        calendar,
+        count=1,
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="自然言語の予定を JSON 経由で ICS カレンダーへ追加します。")
     source = parser.add_mutually_exclusive_group(required=True)
@@ -148,11 +157,14 @@ def main() -> None:
     parser.add_argument("--json-output", type=Path, help="Gemini が生成した予定 JSON の保存先")
     parser.add_argument("--year", type=int, default=datetime.now(JST).year, help="本文で年が省略された場合の年")
     parser.add_argument("--duration", type=int, default=180, help="終了時刻がない場合の所要時間（分）")
+    parser.add_argument("--calendar-name", required=True, help="ICS カレンダーの表示名")
     parser.add_argument("--output", type=Path, required=True, help="出力先 ICS ファイル")
     args = parser.parse_args()
 
     if args.duration <= 0:
         parser.error("所要時間は1分以上にしてください。")
+    if not args.calendar_name.strip():
+        parser.error("カレンダー名を指定してください。")
     if args.events_json:
         contents = json.loads(args.events_json.read_text(encoding="utf-8"))
     else:
@@ -177,7 +189,7 @@ def main() -> None:
         existing = args.output.read_text(encoding="utf-8").rstrip("\r\n")
         if not existing.endswith("END:VCALENDAR"):
             parser.error("出力先の ICS ファイルが不正です。")
-        existing = remove_source_events(existing)
+        existing = set_calendar_name(remove_source_events(existing), args.calendar_name)
         calendar = f"{existing.removesuffix('END:VCALENDAR').rstrip()}\r\n{rendered_events}\r\nEND:VCALENDAR\r\n"
     else:
         calendar = "\r\n".join(
@@ -186,7 +198,7 @@ def main() -> None:
                 "VERSION:2.0",
                 "PRODID:-//LifeLogs//Copy Calendar//JA",
                 "CALSCALE:GREGORIAN",
-                "X-WR-CALNAME:コピー用カレンダー",
+                f"X-WR-CALNAME:{escape_ics(args.calendar_name)}",
                 "X-WR-TIMEZONE:Asia/Tokyo",
                 rendered_events,
                 "END:VCALENDAR",

@@ -35,11 +35,13 @@ jobs:
         shell: bash
         env:
           GEMINI_APIKEY: ${{ secrets.GEMINI_APIKEY }}
+          CALENDAR_NAME: LifeLogs
         run: |
           set -euo pipefail
           python scripts/add_ics_event.py \
             --source calendar/event-source.html \
             --json-output calendar/event-sources/latest.json \
+            --calendar-name "$CALENDAR_NAME" \
             --output calendar/calender.ics
 
       - name: Commit calendar changes
