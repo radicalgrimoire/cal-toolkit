@@ -1,22 +1,14 @@
 {
   "schema_version": 1,
-  "title": "[Alexandros] presents THIS FES ’26 in Sagamihara",
+  "title": "SOPHIA YEAR END LIVE 2026",
   "events": [
     {
-      "title": "[Alexandros] presents THIS FES ’26 in Sagamihara",
-      "date": "2026-10-31",
-      "open_at": "09:00",
-      "start_at": "11:00",
-      "end_at": "19:30",
-      "location": "相模原ギオンフィールド、及びその周辺"
-    },
-    {
-      "title": "[Alexandros] presents THIS FES ’26 in Sagamihara",
-      "date": "2026-11-01",
-      "open_at": "09:00",
-      "start_at": "11:00",
-      "end_at": "19:30",
-      "location": "相模原ギオンフィールド、及びその周辺"
+      "title": "SOPHIA YEAR END LIVE 2026",
+      "date": "2026-12-31",
+      "open_at": "15:00",
+      "start_at": "16:00",
+      "end_at": "",
+      "location": "オリックス劇場"
     }
   ]
 }
