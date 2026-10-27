@@ -28,6 +28,7 @@ jobs:
           set -euo pipefail
           test -n "$CALENDAR_SOURCE_URL"
           curl --fail --location --proto '=https' --tlsv1.2 \
+            -A 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36' \
             --output calendar/event-source.html \
             "$CALENDAR_SOURCE_URL"
 

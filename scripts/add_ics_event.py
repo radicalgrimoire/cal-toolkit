@@ -226,6 +226,7 @@ def main() -> None:
                 "",
             )
         )
+    calendar = calendar.replace("\r\n", "\n").replace("\r", "\n").replace("\n", "\r\n")
     args.output.write_text(calendar, encoding="utf-8", newline="")
 
 
