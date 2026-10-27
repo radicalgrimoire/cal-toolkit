@@ -6,6 +6,7 @@ import json
 import os
 import re
 import sys
+import time
 import urllib.error
 import urllib.request
 from datetime import datetime, timedelta, timezone
@@ -16,6 +17,8 @@ from zoneinfo import ZoneInfo
 
 JST = ZoneInfo("Asia/Tokyo")
 SOURCE_ID = "calendar/event-source.md"
+RETRYABLE_STATUS_CODES = (429, 500, 502, 503, 504)
+MAX_ATTEMPTS = 3
 
 
 def escape_ics(value: str) -> str:
@@ -57,15 +60,33 @@ def request_events(source: str, year: int, api_key: str) -> dict:
         headers={"Content-Type": "application/json", "X-goog-api-key": api_key},
         method="POST",
     )
-    try:
-        with urllib.request.urlopen(request, timeout=60) as response:
-            text = json.load(response)["candidates"][0]["content"]["parts"][0]["text"]
-        return json.loads(text)
-    except urllib.error.HTTPError as error:
-        payload = error.read().decode("utf-8", errors="replace")
-        raise RuntimeError(f"Gemini API 呼び出しに失敗しました: HTTP {error.code} {payload[:400]}") from error
-    except (urllib.error.URLError, TimeoutError, KeyError, IndexError, TypeError, json.JSONDecodeError) as error:
-        raise RuntimeError(f"Gemini の予定 JSON 生成に失敗しました: {error}") from error
+    for attempt in range(1, MAX_ATTEMPTS + 1):
+        try:
+            with urllib.request.urlopen(request, timeout=60) as response:
+                text = json.load(response)["candidates"][0]["content"]["parts"][0]["text"]
+            return json.loads(text)
+        except urllib.error.HTTPError as error:
+            error_body = error.read().decode("utf-8", errors="replace")[:400]
+            if error.code not in RETRYABLE_STATUS_CODES or attempt == MAX_ATTEMPTS:
+                raise RuntimeError(f"Gemini API 呼び出しに失敗しました: HTTP {error.code} {error_body}") from error
+            print(
+                f"Gemini API が一時エラーを返したため再試行します: {attempt}/{MAX_ATTEMPTS} "
+                f"(HTTP {error.code}) {error_body}",
+                file=sys.stderr,
+            )
+        except (urllib.error.URLError, TimeoutError) as error:
+            if attempt == MAX_ATTEMPTS:
+                raise RuntimeError(f"Gemini API との通信に失敗しました: {error}") from error
+            print(
+                f"Gemini API との通信に失敗したため再試行します: {attempt}/{MAX_ATTEMPTS} ({error})",
+                file=sys.stderr,
+            )
+        except (KeyError, IndexError, TypeError, json.JSONDecodeError) as error:
+            raise RuntimeError(f"Gemini の予定 JSON 生成に失敗しました: {error}") from error
+
+        time.sleep(10 * 2 ** (attempt - 1))
+
+    raise RuntimeError("Gemini API の再試行回数を超えました。")
 
 
 def validate_events(contents: object) -> list[dict[str, str]]:

@@ -53,6 +53,7 @@ The input JSON must use schema version 1 and provide `title`, `date`, `open_at`,
 
 ## Notes
 
+- Gemini API が HTTP 429・500・502・503・504、通信エラー、またはタイムアウトを返した場合は、10秒・20秒の待機を挟んで最大3回まで試行します。503 はモデルの混雑でも発生します。失敗が続く場合はエラー本文を確認し、時間をおいてワークフローを再実行してください。それ以外の HTTP エラーや不正な JSON 応答は再試行せずに失敗します。
 - The source URL must be HTTPS when using the GitHub Actions workflow.
 - The event parser does not invent dates, times, or venues that are absent from the source page.
 - The calendar uses the `Asia/Tokyo` timezone and writes UTC timestamps to the ICS file.
